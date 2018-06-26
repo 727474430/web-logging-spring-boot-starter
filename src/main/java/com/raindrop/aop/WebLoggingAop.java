@@ -1,5 +1,6 @@
 package com.raindrop.aop;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.raindrop.anno.WebLogging;
 import org.aspectj.lang.JoinPoint;
@@ -10,14 +11,13 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
-import java.util.Date;
 
 /**
  * @name: com.raindrop.aop.WebLoggingAop.java
@@ -27,14 +27,16 @@ import java.util.Date;
  * @copyright:
  */
 @Aspect
-@Component
+@Configuration
 public class WebLoggingAop {
 
 	private static Logger logger = LoggerFactory.getLogger(WebLogging.class);
 
 	private ThreadLocal<Long> time = new ThreadLocal();
 
+	/** need to exclude path */
 	private String excludePath;
+	/** need to print request headers */
 	private String printHeader;
 
 	public WebLoggingAop(String excludePath, String printHeader) {
@@ -52,23 +54,44 @@ public class WebLoggingAop {
 		ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
 		HttpServletRequest request = requestAttributes.getRequest();
 
-		if (isExcludePath(request.getRequestURI())) return;
+		if (isExcludePath(request.getRequestURI())) {
+			return;
+		}
 
 		try {
-			time.set(new Date().getTime());
+			time.set(System.currentTimeMillis());
 			logger.info("=============Request Payload Start============");
 			logger.info("Request Url: {}", request.getRequestURL().toString());
-			logger.info("Request Content-Type: {}", request.getContentType());
+			logger.info("Request Content-Type: {}", request.getHeader("Content-Type"));
 			logger.info("Request Method: {}", request.getMethod());
 			logger.info("Request Headers: {}", getHeaders(request, printHeader));
 			logger.info("Request Description: {}", getDescription(joinPoint));
-			logger.info("Request Parameters: {}", getRequestParameter(joinPoint));
+			logger.info("Request Payload: {}", getRequestParameter(joinPoint));
 			logger.info("=============Request Payload End==============");
-		} catch (Exception e) { }
+		} catch (Exception e) {
+			logger.error("WebLoggingAop Request Parameter Parse Error: {}", e.getMessage());
+		}
+	}
+
+	@AfterReturning(returning = "result", pointcut = "pointcut()")
+	public void afterReturning(Object result) {
+		ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+		HttpServletResponse response = requestAttributes.getResponse();
+		HttpServletRequest request = requestAttributes.getRequest();
+
+		if (isExcludePath(request.getRequestURI())) {
+			return;
+		}
+
+		logger.info("=============Response Payload Start============");
+		logger.info("Response Status: {}", response.getStatus());
+		logger.info("Response Payload: {}", JSON.toJSONString(result));
+		logger.info("Request Time: [ {}ms ]", System.currentTimeMillis() - time.get());
+		logger.info("=============Response Payload End==============");
 	}
 
 	/**
-	 * 封装请求参数为Json格式
+	 * Combination request parameters to json format
 	 *
 	 * @param joinPoint
 	 * @return
@@ -84,23 +107,8 @@ public class WebLoggingAop {
 		return jsonObject.toJSONString();
 	}
 
-	@AfterReturning(returning = "result", pointcut = "pointcut()")
-	public void afterReturning(Object result) {
-		ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-		HttpServletResponse response = requestAttributes.getResponse();
-		HttpServletRequest request = requestAttributes.getRequest();
-
-		if (isExcludePath(request.getRequestURI())) return;
-
-		logger.info("=============Response Payload Start============");
-		logger.info("Response Status: {}", response.getStatus());
-		logger.info("Response Body: {}", result.toString());
-		logger.info("Request Time: [ {}ms ]", new Date().getTime() - time.get());
-		logger.info("=============Response Payload End==============");
-	}
-
 	/**
-	 * 得到方法描述
+	 * get request method description info
 	 *
 	 * @param joinPoint
 	 * @return
@@ -114,7 +122,7 @@ public class WebLoggingAop {
 	}
 
 	/**
-	 * 返回指定Header信息
+	 * return specify headers info
 	 *
 	 * @param printHeader
 	 * @return
@@ -135,12 +143,13 @@ public class WebLoggingAop {
 
 	/**
 	 * 如果在excludePath中则为排除url 不进行日志处理
+	 * if request uri is in the exclude path, return false otherwise return true
 	 *
 	 * @param requestURI
 	 * @return
 	 */
 	private boolean isExcludePath(String requestURI) {
-		if (excludePath != null) {
+		if (excludePath != null && !"".equals(excludePath)) {
 			String[] excludePaths = this.excludePath.split(";");
 			for (int i = 0; i < excludePaths.length; i++) {
 				if (requestURI.indexOf(excludePaths[i]) != -1) {

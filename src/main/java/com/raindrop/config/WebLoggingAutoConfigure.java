@@ -11,10 +11,9 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * @name: com.raindrop.config.WebLoggingAutoConfigure.java
- * @description: WebLogging自动装配
+ * @description: WebLogging Auto Configure
  * @author: Wang Liang
  * @create Time: 2018/6/13 8:49 PM
- * @copyright:
  */
 @Configuration
 @ConditionalOnClass(WebLoggingAop.class)

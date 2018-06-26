@@ -3,7 +3,10 @@ package com.raindrop.anno;
 import java.lang.annotation.*;
 
 /**
- * Created by wangliang on 2018/6/13.
+ * @name: com.raindrop.anno.WebLogging.java
+ * @description: 接口描述注解
+ * @author: Wang Liang 
+ * @create Time: 2018/6/13 16:15
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

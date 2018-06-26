@@ -12,8 +12,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("web.log")
 public class WebLoggingProperties {
 
+	/** whether open web log aop function */
 	private String enable = "false";
+	/** need to exclude path */
 	private String excludePath = "";
+	/** need to print request headers */
 	private String printHeader = "";
 
 	public String getEnable() {
