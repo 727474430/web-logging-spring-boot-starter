@@ -57,7 +57,7 @@
     log:
       enable: true
       exclude-path: /oldapp/;/oldproject/
-      print-header: Host;Cookie
+      print-header: Host;Cookie # notes: Case Sensitive
   ```
 
 
