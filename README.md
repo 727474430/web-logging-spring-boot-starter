@@ -2,7 +2,7 @@
 
 ​    Mainly provides interface for requesting log information printing function, which simplifies the need to write an interface requesting log function for each project.
 
-[中文注释](https://github.com/727474430/web-logging-spring-boot-starter/blob/master/README_CN.md) 
+[中文注释](./README_CN.md) 
 
 
 

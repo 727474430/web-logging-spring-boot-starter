@@ -1,7 +1,9 @@
 /target/
-!.mvn/wrapper/maven-wrapper.jar
+.mvn/
 
-### STS ###
+/gitignore
+
+###STS ###
 .apt_generated
 .classpath
 .factorypath
