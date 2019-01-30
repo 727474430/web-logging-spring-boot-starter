@@ -71,3 +71,7 @@
 ![](src/main/resources/img/anno.png)
 
 ![](src/main/resources/img/controller.png)
+
+
+
+[![](https://jitpack.io/v/727474430/web-logging-spring-boot-starter.svg)](https://jitpack.io/#727474430/web-logging-spring-boot-starter)
