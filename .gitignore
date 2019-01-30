@@ -1,7 +1,6 @@
 /target/
-.mvn/
 
-/gitignore
+.gitignore
 
 ###STS ###
 .apt_generated
@@ -27,6 +26,6 @@
 /.nb-gradle/
 
 ### Custom
-.mvn/
+**/.mvn/
 mvnw
 mvnw.cmd
