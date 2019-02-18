@@ -33,8 +33,10 @@ public class WebLoggingAop {
 
     private static Logger logger = LoggerFactory.getLogger(WebLogging.class);
 
+    /**
+     * Statistics request execute time
+     */
     private ThreadLocal<Long> time = new ThreadLocal();
-
     /**
      * need to exclude path
      */
