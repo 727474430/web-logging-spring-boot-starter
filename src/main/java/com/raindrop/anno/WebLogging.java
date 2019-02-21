@@ -4,7 +4,7 @@ import java.lang.annotation.*;
 
 /**
  * @name: com.raindrop.anno.WebLogging.java
- * @description: 接口描述注解
+ * @description: Interface description annotation
  * @author: Wang Liang 
  * @create Time: 2018/6/13 16:15
  */

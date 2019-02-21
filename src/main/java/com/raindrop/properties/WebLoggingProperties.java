@@ -4,7 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * @name: com.raindrop.properties.WebLoggingProperties.java
- * @description: WebLogging配置实体
+ * @description: WebLogging properties
  * @author: Wang Liang
  * @create Time: 2018/6/13 8:44 PM
  * @copyright:
