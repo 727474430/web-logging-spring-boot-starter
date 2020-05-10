@@ -21,16 +21,16 @@ import org.springframework.context.annotation.Configuration;
 @ConditionalOnProperty(prefix = "web.log", value = "enable", havingValue = "true")
 public class WebLoggingAutoConfigure {
 
-	private final WebLoggingProperties properties;
+    private final WebLoggingProperties properties;
 
-	public WebLoggingAutoConfigure(WebLoggingProperties properties) {
-		this.properties = properties;
-	}
+    public WebLoggingAutoConfigure(WebLoggingProperties properties) {
+        this.properties = properties;
+    }
 
-	@Bean
-	@ConditionalOnMissingBean(WebLoggingAop.class)
-	public WebLoggingAop initWebLogging() {
-		return new WebLoggingAop(properties.getExcludePath(), properties.getPrintHeader());
-	}
+    @Bean
+    @ConditionalOnMissingBean(WebLoggingAop.class)
+    public WebLoggingAop initWebLogging() {
+        return new WebLoggingAop(properties.getExcludePath(), properties.getPrintHeader());
+    }
 
 }

@@ -5,7 +5,7 @@ import java.lang.annotation.*;
 /**
  * @name: com.raindrop.anno.WebLogging.java
  * @description: Interface description annotation
- * @author: Wang Liang 
+ * @author: Wang Liang
  * @create Time: 2018/6/13 16:15
  */
 @Target(ElementType.METHOD)
@@ -13,6 +13,9 @@ import java.lang.annotation.*;
 @Documented
 public @interface WebLogging {
 
-	String description() default "";
+    /**
+     * Web interface description
+     */
+    String value() default "";
 
 }

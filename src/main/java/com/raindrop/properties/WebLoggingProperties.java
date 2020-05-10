@@ -12,34 +12,41 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("web.log")
 public class WebLoggingProperties {
 
-	/** whether open web log aop function */
-	private String enable = "false";
-	/** need to exclude path */
-	private String excludePath = "";
-	/** need to print request headers */
-	private String printHeader = "";
+    /**
+     * whether open web log aop function
+     */
+    private String enable = "false";
+    /**
+     * need to exclude path
+     */
+    private String excludePath = "";
+    /**
+     * need to print request headers. Use ; split multiple request headers
+     */
+    private String printHeader = "";
 
-	public String getEnable() {
-		return enable;
-	}
+    public String getEnable() {
+        return enable;
+    }
 
-	public void setEnable(String enable) {
-		this.enable = enable;
-	}
+    public void setEnable(String enable) {
+        this.enable = enable;
+    }
 
-	public String getExcludePath() {
-		return excludePath;
-	}
+    public String getExcludePath() {
+        return excludePath;
+    }
 
-	public void setExcludePath(String excludePath) {
-		this.excludePath = excludePath;
-	}
+    public void setExcludePath(String excludePath) {
+        this.excludePath = excludePath;
+    }
 
-	public String getPrintHeader() {
-		return printHeader;
-	}
+    public String getPrintHeader() {
+        return printHeader;
+    }
 
-	public void setPrintHeader(String printHeader) {
-		this.printHeader = printHeader;
-	}
+    public void setPrintHeader(String printHeader) {
+        this.printHeader = printHeader;
+    }
+
 }
