@@ -5,7 +5,7 @@
 
 ### 如何使用.
 
-1. **git clone <https://github.com/727474430/weblog-spring-boot-starter.git>** 
+1. **git clone <https://github.com/727474430/web-logging-spring-boot-starter.git>** 
 
 2. **cd web-logging-spring-boot-starter** 
 
