@@ -31,12 +31,12 @@ import java.util.Enumeration;
 @Configuration
 public class WebLoggingAop {
 
-    private static Logger logger = LoggerFactory.getLogger(WebLogging.class);
+    private static final Logger logger = LoggerFactory.getLogger(WebLoggingAop.class);
 
     /**
      * Statistics request execute time
      */
-    private ThreadLocal<Long> time = new ThreadLocal();
+    private final ThreadLocal<Long> time = new ThreadLocal();
     /**
      * need to exclude path
      */
@@ -54,10 +54,18 @@ public class WebLoggingAop {
     public WebLoggingAop() {
     }
 
+    /**
+     * Annotation pointcut
+     */
     @Pointcut("@annotation(com.raindrop.anno.WebLogging)")
     public void pointcut() {
     }
 
+    /**
+     * Intercept before api execution
+     *
+     * @param joinPoint
+     */
     @Before(value = "pointcut()")
     public void before(JoinPoint joinPoint) {
         ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
@@ -70,7 +78,7 @@ public class WebLoggingAop {
         try {
             time.set(System.currentTimeMillis());
             logger.info("=============Request Start============");
-            logger.info("Request Url          : {}", request.getRequestURL().toString());
+            logger.info("Request Url          : {}", request.getRequestURL());
             logger.info("Request Method       : {}", request.getMethod());
             logger.info("Request IP           : {}", request.getRemoteAddr());
             logger.info("Request Content-Type : {}", request.getHeader("Content-Type"));
@@ -82,6 +90,11 @@ public class WebLoggingAop {
         }
     }
 
+    /**
+     * Intercept after api execution
+     *
+     * @param result
+     */
     @AfterReturning(returning = "result", pointcut = "pointcut()")
     public void afterReturning(Object result) {
         ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
@@ -139,11 +152,9 @@ public class WebLoggingAop {
         JSONObject result = new JSONObject();
         if (printHeader != null && !"".equals(printHeader)) {
             String[] specifyHeaders = printHeader.split(";");
-            for (int i = 0; i < specifyHeaders.length; i++) {
-                String header = request.getHeader(specifyHeaders[i]);
-                if (header != null || !"".equals(header)) {
-                    result.put(specifyHeaders[i], header);
-                }
+            for (String specifyHeader : specifyHeaders) {
+                String header = request.getHeader(specifyHeader);
+                result.put(specifyHeader, header);
             }
         }
         return result.toJSONString();
@@ -152,14 +163,14 @@ public class WebLoggingAop {
     /**
      * if request uri is in the exclude path, return false otherwise return true
      *
-     * @param requestURI Client Request Target Url
+     * @param requestUri Client Request Target Url
      * @return
      */
-    private boolean isExcludePath(String requestURI) {
+    private boolean isExcludePath(String requestUri) {
         if (excludePath != null && !"".equals(excludePath)) {
             String[] excludePaths = this.excludePath.split(";");
-            for (int i = 0; i < excludePaths.length; i++) {
-                if (requestURI.indexOf(excludePaths[i]) != -1) {
+            for (String path : excludePaths) {
+                if (requestUri.contains(path)) {
                     return true;
                 }
             }
