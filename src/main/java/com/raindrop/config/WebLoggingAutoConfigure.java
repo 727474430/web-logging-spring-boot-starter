@@ -2,6 +2,8 @@ package com.raindrop.config;
 
 import com.raindrop.aop.WebLoggingAop;
 import com.raindrop.properties.WebLoggingProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -21,6 +23,8 @@ import org.springframework.context.annotation.Configuration;
 @ConditionalOnProperty(prefix = "web.log", value = "enable", havingValue = "true")
 public class WebLoggingAutoConfigure {
 
+    private static final Logger logger = LoggerFactory.getLogger(WebLoggingAutoConfigure.class);
+
     private final WebLoggingProperties properties;
 
     public WebLoggingAutoConfigure(WebLoggingProperties properties) {
@@ -30,6 +34,10 @@ public class WebLoggingAutoConfigure {
     @Bean
     @ConditionalOnMissingBean(WebLoggingAop.class)
     public WebLoggingAop initWebLogging() {
+        logger.info("" +
+                "\n=============================================================" +
+                "\n=========== Web Logging Spring Boot Start Enabled ===========" +
+                "\n=============================================================");
         return new WebLoggingAop(properties.getExcludePath(), properties.getPrintHeader());
     }
 
