@@ -1,6 +1,7 @@
 package com.raindrop.aop;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.raindrop.anno.WebLogging;
 import org.aspectj.lang.JoinPoint;
@@ -12,6 +13,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -84,7 +86,7 @@ public class WebLoggingAop {
             logger.info("Request Content-Type : {}", request.getHeader("Content-Type"));
             logger.info("Request Headers      : {}", getHeaders(request, printHeader));
             logger.info("Request Description  : {}", getDescription(joinPoint));
-            logger.info("Request Payload      : {}", getRequestParameter(request));
+            logger.info("Request Payload      : {}", getRequestParameter(request, joinPoint));
         } catch (Exception e) {
             logger.error("WebLoggingAop Request Parameter Parse Error: {}", e.getMessage());
         }
@@ -118,7 +120,21 @@ public class WebLoggingAop {
      * @param request
      * @return
      */
-    private String getRequestParameter(HttpServletRequest request) {
+    private String getRequestParameter(HttpServletRequest request, JoinPoint joinPoint) {
+        String params = getParameter(request);
+        if (StringUtils.isEmpty(params)) {
+            params = getParameter(joinPoint);
+        }
+        return params;
+    }
+
+    /**
+     * Get parameter from request
+     *
+     * @param request
+     * @return
+     */
+    private String getParameter(HttpServletRequest request) {
         JSONObject jsonObject = new JSONObject();
         Enumeration<String> parameterNames = request.getParameterNames();
         while (parameterNames.hasMoreElements()) {
@@ -126,7 +142,26 @@ public class WebLoggingAop {
             String value = request.getParameter(key);
             jsonObject.put(key, value);
         }
-        return jsonObject.toJSONString();
+        return jsonObject.isEmpty() ? "" : jsonObject.toJSONString();
+    }
+
+    /**
+     * Get parameter from joinPoint
+     *
+     * @param joinPoint
+     * @return
+     */
+    private String getParameter(JoinPoint joinPoint) {
+        JSONObject jsonObject = new JSONObject();
+        JSONObject signatureJson = JSON.parseObject(JSON.toJSONString(joinPoint.getSignature()));
+        JSONArray parameterNames = signatureJson.getJSONArray("parameterNames");
+        Object[] args = joinPoint.getArgs();
+        for (int i = 0; i < parameterNames.size(); i++) {
+            if (!(args[i] instanceof HttpServletRequest) && !(args[i] instanceof HttpServletResponse)) {
+                jsonObject.put(parameterNames.getString(i), args[i]);
+            }
+        }
+        return jsonObject.isEmpty() ? "" : jsonObject.toJSONString();
     }
 
     /**
