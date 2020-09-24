@@ -4,10 +4,11 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.raindrop.anno.WebLogging;
+import com.raindrop.util.JsonUtil;
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
@@ -47,10 +48,15 @@ public class WebLoggingAop {
      * need to print request headers
      */
     private String printHeader;
+    /**
+     * whether to format parameters
+     */
+    private boolean format;
 
-    public WebLoggingAop(String excludePath, String printHeader) {
+    public WebLoggingAop(String excludePath, String printHeader, boolean format) {
         this.excludePath = excludePath;
         this.printHeader = printHeader;
+        this.format = format;
     }
 
     public WebLoggingAop() {
@@ -64,54 +70,45 @@ public class WebLoggingAop {
     }
 
     /**
-     * Intercept before api execution
+     * Intercept api execution
      *
-     * @param joinPoint
+     * @param pj
+     * @return
+     * @throws Throwable
      */
-    @Before(value = "pointcut()")
-    public void before(JoinPoint joinPoint) {
-        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        HttpServletRequest request = requestAttributes.getRequest();
-
-        if (isExcludePath(request.getRequestURI())) {
-            return;
-        }
-
-        try {
-            time.set(System.currentTimeMillis());
-            logger.info("=============Request Start============");
-            logger.info("Request Url          : {}", request.getRequestURL());
-            logger.info("Request Method       : {}", request.getMethod());
-            logger.info("Request IP           : {}", request.getRemoteAddr());
-            logger.info("Request Content-Type : {}", request.getHeader("Content-Type"));
-            logger.info("Request Headers      : {}", getHeaders(request, printHeader));
-            logger.info("Request Description  : {}", getDescription(joinPoint));
-            logger.info("Request Payload      : {}", getRequestParameter(request, joinPoint));
-        } catch (Exception e) {
-            logger.error("WebLoggingAop Request Parameter Parse Error: {}", e.getMessage());
-        }
-    }
-
-    /**
-     * Intercept after api execution
-     *
-     * @param result
-     */
-    @AfterReturning(returning = "result", pointcut = "pointcut()")
-    public void afterReturning(Object result) {
+    @Around(value = "pointcut()")
+    public Object around(ProceedingJoinPoint pj) throws Throwable {
         ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletResponse response = requestAttributes.getResponse();
         HttpServletRequest request = requestAttributes.getRequest();
 
         if (isExcludePath(request.getRequestURI())) {
-            return;
+            return pj.proceed();
         }
 
-        logger.info("Response Status      : {}", response.getStatus());
-        logger.info("Response Payload     : {}", JSON.toJSONString(result));
-        logger.info("Request Time         : {}ms", System.currentTimeMillis() - time.get());
-        logger.info("=============Request End==============");
-        time.remove();
+        StringBuilder sb = new StringBuilder();
+        Object result = null;
+        try {
+            time.set(System.currentTimeMillis());
+            sb.append("=============Request Logging Start============");
+            sb.append("\nRequest Url          : " + request.getRequestURL());
+            sb.append("\nRequest Method       : " + request.getMethod());
+            sb.append("\nRequest IP           : " + request.getRemoteAddr());
+            sb.append("\nRequest Headers      : " + formatParameter(getHeaders(request, printHeader)));
+            sb.append("\nRequest Description  : " + getDescription(pj));
+            sb.append("\nRequest Payload      : " + formatParameter(getRequestParameter(request, pj)));
+            result = pj.proceed();
+            sb.append("\nResponse Status      : " + response.getStatus());
+            sb.append("\nResponse Payload     : " + formatParameter(JSON.toJSONString(result)));
+            sb.append("\nRequest Time         : " + (System.currentTimeMillis() - time.get()) + "ms\n");
+            sb.append("=============Request Logging End==============");
+            time.remove();
+        } catch (Exception e) {
+            logger.error("WebLoggingAop Request Parameter Parse Error: {}", e.getMessage());
+        } finally {
+            logger.info(sb.toString());
+        }
+        return result;
     }
 
     /**
@@ -211,6 +208,22 @@ public class WebLoggingAop {
             }
         }
         return false;
+    }
+
+    /**
+     * Format json type parameter
+     *
+     * @param parameter parameter data
+     * @return
+     */
+    private String formatParameter(String parameter) {
+        if (format) {
+            boolean isJsonObject = JsonUtil.isValidObject(parameter);
+            if (isJsonObject) {
+                return JsonUtil.jsonFormat(parameter);
+            }
+        }
+        return parameter;
     }
 
 }

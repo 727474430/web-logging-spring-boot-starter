@@ -24,6 +24,10 @@ public class WebLoggingProperties {
      * need to print request headers. Use ; split multiple request headers
      */
     private String printHeader = "";
+    /**
+     * whether to format parameters
+     */
+    private boolean format;
 
     public String getEnable() {
         return enable;
@@ -47,6 +51,14 @@ public class WebLoggingProperties {
 
     public void setPrintHeader(String printHeader) {
         this.printHeader = printHeader;
+    }
+
+    public boolean isFormat() {
+        return format;
+    }
+
+    public void setFormat(boolean format) {
+        this.format = format;
     }
 
 }

@@ -38,7 +38,7 @@ public class WebLoggingAutoConfigure {
                 "\n=============================================================" +
                 "\n=========== Web Logging Spring Boot Start Enabled ===========" +
                 "\n=============================================================");
-        return new WebLoggingAop(properties.getExcludePath(), properties.getPrintHeader());
+        return new WebLoggingAop(properties.getExcludePath(), properties.getPrintHeader(), properties.isFormat());
     }
 
 }
