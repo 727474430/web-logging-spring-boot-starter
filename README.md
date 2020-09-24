@@ -19,7 +19,7 @@
    <dependency>
        <groupId>com.raindrop</groupId>
        <artifactId>web-logging-spring-boot-starter</artifactId>
-       <version>1.1.RELEASE</version>
+       <version>1.3.RELEASE</version>
    </dependency>
    ```
 
@@ -36,7 +36,10 @@
    * web.log.print-header
 
      Need to printing request header, User **";"** split multiple request headers
-
+     
+   * web.log.format
+   
+     whether to format parameters. default is **false** not format. select true is enable
 
 
 ### Example
@@ -47,6 +50,7 @@
   web.log.enable=true
   web.log.print-header=Host;Connection;
   web.log.exclude-path=/disable
+  web.log.format=true
   ```
 
 * application.yml
@@ -57,6 +61,7 @@
       enable: true
       exclude-path: /disable
       print-header: Host;Connection;
+      format: true
   ```
 
 
@@ -67,6 +72,5 @@
 ![](src/main/resources/img/anno.png)
 
 ![](src/main/resources/img/logging.png)
-
 
 [![](https://jitpack.io/v/727474430/web-logging-spring-boot-starter.svg)](https://jitpack.io/#727474430/web-logging-spring-boot-starter)
